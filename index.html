@@ -179,13 +179,11 @@
         <div class="timer" id="work-timer">60:00</div>
     </div>
 
-    <!-- Блокирующий экран медитации -->
     <div class="overlay" id="rest-overlay">
         <div class="overlay-content">
             
             <div class="cheburashka-container">
                 <div class="aura"></div>
-                <!-- Логотип Чебурашки -->
                 <img class="cheburashka-logo" src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Cheburashka_vector_transparent.svg" alt="Чебурашка медитирует">
             </div>
             
@@ -204,68 +202,4 @@
         </div>
     </div>
 
-    <!-- Приятный тибетский гонг для медитации -->
-    <audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav" preload="auto"></audio>
-
-    <script>
-        // Настройки времени в секундах
-        const WORK_DURATION = 120; // 2 минуты = 120  сек
-        const REST_DURATION = 120;  // 2 минуты = 120 сек
-
-        let timer;
-        let timeLeft = WORK_DURATION;
-        let isWorking = true;
-
-        const workTimerDisplay = document.getElementById('work-timer');
-        const restTimerDisplay = document.getElementById('rest-timer');
-        const restOverlay = document.getElementById('rest-overlay');
-        const skipBtn = document.getElementById('skip-btn');
-        const alarmSound = document.getElementById('alarm-sound');
-
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const secs = (seconds % 60).toString().padStart(2, '0');
-            return `${mins}:${secs}`;
-        }
-
-        function updateTimer() {
-            if (isWorking) {
-                timeLeft--;
-                workTimerDisplay.textContent = formatTime(timeLeft);
-                if (timeLeft <= 0) {
-                    startRestPhase();
-                }
-            } else {
-                timeLeft--;
-                restTimerDisplay.textContent = formatTime(timeLeft);
-                if (timeLeft <= 0) {
-                    startWorkPhase();
-                }
-            }
-        }
-
-        function startRestPhase() {
-            isWorking = false;
-            timeLeft = REST_DURATION;
-            restTimerDisplay.textContent = formatTime(timeLeft);
-            restOverlay.classList.add('active');
-            
-            // Запуск глубокого гонга
-            alarmSound.play().catch(e => console.log("Нажмите на экран для активации звука"));
-        }
-
-        function startWorkPhase() {
-            isWorking = true;
-            timeLeft = WORK_DURATION;
-            workTimerDisplay.textContent = formatTime(timeLeft);
-            restOverlay.classList.remove('active');
-            alarmSound.pause();
-            alarmSound.currentTime = 0;
-        }
-
-        skipBtn.addEventListener('click', startWorkPhase);
-        timer = setInterval(updateTimer, 1000);
-        workTimerDisplay.textContent = formatTime(WORK_DURATION);
-    </script>
-</body>
-</html>
+    <audio id="alarm-sound" src="
