@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChebuYoga</title>
+    <style>
+        :root { --bg: #121212; --card: #1e1e1e; --text: #ffffff; --accent: #ff9800; --music: #4caf50; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .container { text-align: center; background: var(--card); padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 350px; }
+        h1 { font-size: 24px; color: var(--accent); margin: 0 0 10px 0; }
+        .timer { font-size: 64px; font-weight: bold; margin: 15px 0; font-variant-numeric: tabular-nums; }
+        .status { font-size: 16px; color: #aaa; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(25, 18, 12, 0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.5s; }
+        .overlay.active { opacity: 1; pointer-events: auto; }
+        .content { text-align: center; max-width: 600px; padding: 20px; display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        
+        /* Стили для твоего видеоролика */
+        .my-video {
+            width: 320px;
+            height: 180px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(255, 152, 0, 0.3);
+            margin-bottom: 15px;
+            background: #000;
+        }
+        
+        .speech { font-style: italic; color: #ffcc80; font-size: 18px; margin-bottom: 15px; }
+        .exercises { text-align: left; font-size: 18px; line-height: 1.5; margin-bottom: 20px; width: 100%; }
+        .btn-group { display: flex; gap: 15px; justify-content: center; margin-bottom: 15px; }
+        .btn { background: transparent; color: #ffcc80; border: 2px solid var(--accent); padding: 12px 25px; font-size: 16px; border-radius: 25px; cursor: pointer; transition: all 0.2s; }
+        .btn:hover { background: var(--accent); color: #121212; transform: scale(1.05); }
+        .btn-m { border-color: var(--music); color: #a5d6a7; }
+        .btn-m:hover { background: var(--music); color: #121212; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Время работать ✨</h1>
+        <div class="status" id="status-text">До разминки осталось:</div>
+        <div class="timer" id="w-timer">01:00</div>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <div class="content">
+            
+            <!-- Плеер для твоего локального видео video.mp4 -->
+            <video class="my-video" id="yoga-video" controls preload="auto" loop mutes>
+                <source src="video.mp4" type="video/mp4">
+                Ваш браузер не поддерживает видео.
+            </video>
+            
+            <h2>Время разминки! 🧘‍♂️</h2>
+            <div class="speech">«Ген, заbasic-уйся... Вдохни поглубже и расправь плечи!»</div>
+            <div class="timer" id="r-timer" style="color: var(--accent);">02:00</div>
+            
+            <ul class="exercises">
+                <li>👀 <strong>Глаза:</strong> Закрой глаза на 10 секунд, посмотри в окно вдаль.</li>
+                <li>🧘‍♂️ <strong>Спина:</strong> Встань ровно, потянись лапами вверх.</li>
+                <li>💧 <strong>Вода:</strong> Сделай пару глотков чистой воды.</li>
+            </ul>
+
+            <div class="btn-group">
+                <button class="btn btn-m" id="m-btn">🎵 Включить музыку релакс</button>
+                <button class="btn" id="s-btn">Вернуться в суету</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="bg-music" preload="auto" loop></audio>
+
+    <script>
+        // --- НАСТРОЙКИ (в секундах) ---
+        const WORK_DURATION = 60;   // 1 минута работы для теста
+        const REST_DURATION = 120;  // 2 минуты отдыха
+        const MUSIC_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
+        // ------------------------------
+
+        let timer = null;
+        let notificationSent = false;
+        const wEl = document.getElementById('w-timer');
+        const rEl = document.getElementById('r-timer');
+        const ovEl = document.getElementById('overlay');
+        const musicAudio = document.getElementById('bg-music');
+        const videoPlayer = document.getElementById('yoga-video');
+        
+        musicAudio.src = MUSIC_URL;
+
+        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+
+        function format(seconds) {
+            if (seconds < 0) seconds = 0;
+            return `${Math.floor(seconds/60).toString().padStart(2,'0')}:${(seconds%60).toString().padStart(2,'0')}`;
+        }
+
+        function sendNotification(title, body) {
+            if (Notification.permission === "granted" && !notificationSent) {
+                new Notification(title, { body: body });
+                notificationSent = true;
+            }
+        }
+
+        function updateTimer() {
+            const now = Math.floor(Date.now() / 1000);
+            let endTime = parseInt(localStorage.getItem('chebu_endTime')) || 0;
+            let mode = localStorage.getItem('chebu_mode') || 'work';
+
+            if (endTime === 0) {
+                endTime = now + WORK_DURATION;
+                localStorage.setItem('chebu_endTime', endTime);
+                localStorage.setItem('chebu_mode', 'work');
+                mode = 'work';
+            }
+
+            let timeLeft = endTime - now;
+
+            if (timeLeft <= 0) {
+                if (mode === 'work') {
+                    localStorage.setItem('chebu_mode', 'rest');
+                    localStorage.setItem('chebu_endTime', now + REST_DURATION);
+                    ovEl.classList.add('active');
+                    wEl.innerText = format(0);
+                    rEl.innerText = format(REST_DURATION);
+                    
+                    // Автозапуск видео при открытии экрана разминки
+                    videoPlayer.play().catch(e => console.log("Браузер ждет клика для видео"));
+                    
+                    sendNotification("Чебурашка зовёт!", "Фёдор, пораbasic-оваться! Время разминки.");
+                } else {
+                    startWorkMode();
+                }
+            } else {
+                if (mode === 'work') {
+                    ovEl.classList.remove('active');
+                    wEl.innerText = format(timeLeft);
+                    notificationSent = false;
+                } else {
+                    ovEl.classList.add('active');
+                    rEl.innerText = format(timeLeft);
+                }
+            }
+        }
+
+        function startWorkMode() {
+            const now = Math.floor(Date.now() / 1000);
+            localStorage.setItem('chebu_mode', 'work');
+            localStorage.setItem('chebu_endTime', now + WORK_DURATION);
+            ovEl.classList.remove('active');
+            
+            // Выключаем и музыку, и видео
+            musicAudio.pause();
+            musicAudio.currentTime = 0;
+            videoPlayer.pause();
+            videoPlayer.currentTime = 0;
+            
+            wEl.innerText = format(WORK_DURATION);
+            notificationSent = false;
+        }
+
+        clearInterval(timer);
+        timer = setInterval(updateTimer, 1000);
+        updateTimer();
+
+        document.getElementById('m-btn').addEventListener('click', () => {
+            musicAudio.play().catch(e => console.log("Звук заблокирован"));
+        });
+
+        document.getElementById('s-btn').addEventListener('click', startWorkMode);
+    </script>
+</body>
+</html>
