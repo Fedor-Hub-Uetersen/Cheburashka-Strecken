@@ -13,7 +13,6 @@
             --music: #00ff66;  /* Кислотно-зеленый неон */
             --neon-glow: 0 0 15px var(--accent), 0 0 30px var(--accent);
             --neon-music: 0 0 15px var(--music);
-            /* Мягкое неоновое свечение для мелкого текста в подвале */
             --neon-footer: 0 0 6px var(--accent);
         }
         
@@ -40,6 +39,32 @@
             border: 2px solid var(--accent);
             box-shadow: 0 0 25px rgba(255, 85, 0, 0.2), inset 0 0 15px rgba(255, 85, 0, 0.1); 
             width: 380px; 
+        }
+
+        /* Переключатель языков в левом углу */
+        .lang-switcher {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+        .lang-btn {
+            background: #1a1a24;
+            border: 1px solid #444;
+            color: #8a8a93;
+            padding: 3px 8px;
+            font-size: 11px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .lang-btn.active {
+            border-color: var(--music);
+            color: #fff;
+            box-shadow: 0 0 5px var(--music);
         }
 
         /* Счётчик разминок в углу */
@@ -116,6 +141,7 @@
             box-shadow: 0 0 8px var(--accent);
         }
 
+        /* Всплывающий экран (Оверлей) Чебурашки */
         .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(6, 6, 8, 0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.5s; }
         .overlay.active { opacity: 1; pointer-events: auto; }
         .content { text-align: center; max-width: 600px; padding: 20px; display: flex; flex-direction: column; align-items: center; z-index: 10; }
@@ -140,11 +166,11 @@
         .btn-m { border-color: var(--music); color: #fff; box-shadow: inset 0 0 8px rgba(0, 255, 102, 0.2); min-width: 220px; }
         .btn-m:hover { background: var(--music); box-shadow: var(--neon-music); color: #000; }
 
-        /* Фирменный подвал с полной неоновой подсветкой */
+        /* Фирменный подвал */
         .footer-credits {
             margin-top: 25px;
             font-size: 11px;
-            color: #bbb; /* Сделал базовый текст чуть светлее для контраста */
+            color: #bbb;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
@@ -152,18 +178,24 @@
             color: var(--accent); 
             text-decoration: none; 
             font-weight: bold; 
-            text-shadow: var(--neon-footer); /* Подсветка ссылки */
+            text-shadow: var(--neon-footer);
         }
-        .neon-phone {
+        .neon-phone a {
             color: var(--accent);
             font-weight: bold;
-            text-shadow: var(--neon-footer); /* Подсветка телефона */
+            text-decoration: none;
+            text-shadow: var(--neon-footer);
         }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <div class="lang-switcher">
+            <button class="lang-btn" id="lang-ru">RU</button>
+            <button class="lang-btn" id="lang-de">DE</button>
+        </div>
+
         <div class="streak-counter" id="streak-display">Bio-Score: 0</div>
 
         <div class="logo-area">
@@ -171,21 +203,21 @@
             <img src="wolf.png" alt="Tech.chebur.shop" class="wolf-logo-img" id="wolf-img">
         </div>
 
-        <h1>Время работать ✨</h1>
+        <h1 id="main-title">Время работать ✨</h1>
         <div class="status" id="status-text">До разминки осталось:</div>
         <div class="timer" id="w-timer" style="color: #fff; text-shadow: var(--neon-glow);">01:00</div>
         
         <div class="sound-selector">
-            <label for="alarm-sound-select">🔔 Сигнал разминки:</label>
+            <label for="alarm-sound-select" id="sound-label">🔔 Сигнал разминки:</label>
             <select id="alarm-sound-select">
-                <option value="digital.mp3">Цифровой сигнал</option>
-                <option value="gong.mp3" selected>Космический гонг</option>
-                <option value="bowl.mp3">Тибетская чаша</option>
+                <option value="digital.mp3" id="opt-dig">Цифровой сигнал</option>
+                <option value="gong.mp3" id="opt-gong" selected>Космический гонг</option>
+                <option value="bowl.mp3" id="opt-bowl">Тибетская чаша</option>
             </select>
         </div>
 
         <div class="footer-credits">
-            © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | <span class="neon-phone">+49017661566356</span>
+            © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | <span class="neon-phone"><a href="tel:+49017661566356">+49017661566356</a></span>
         </div>
     </div>
 
@@ -196,15 +228,11 @@
                 Ваш браузер не поддерживает video.
             </video>
             
-            <h2 style="text-shadow: var(--neon-glow);">Время разминки! 🧘‍♂️</h2>
-            <div class="speech">«Ген, заbasic-уйся... Вдохни поглубже и расправь плечи!»</div>
+            <h2 id="rest-title" style="text-shadow: var(--neon-glow);">Время разминки! 🧘‍♂️</h2>
+            <div class="speech" id="rest-speech">«Ген, заbasic-уйся... Вдохни поглубже и расправь плечи!»</div>
             <div class="timer" id="r-timer" style="color: var(--music); text-shadow: var(--neon-music);">02:00</div>
             
-            <ul class="exercises">
-                <li>👀 <strong>Глаза:</strong> Закрой глаза на 10 секунд, посмотри в окно вдаль.</li>
-                <li>🧘‍♂️ <strong>Спина:</strong> Встань ровно, потянись лапами вверх.</li>
-                <li>💧 <strong>Вода:</strong> Сделай пару глотков чистой воды.</li>
-            </ul>
+            <ul class="exercises" id="exercises-list"></ul>
 
             <div class="btn-group">
                 <button class="btn btn-m" id="m-btn">🎵 Включить музыку релакс</button>
@@ -212,7 +240,7 @@
             </div>
 
             <div class="footer-credits" style="color: #888;">
-                © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | <span class="neon-phone">+49017661566356</span>
+                © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | <span class="neon-phone"><a href="tel:+49017661566356">+49017661566356</a></span>
             </div>
         </div>
     </div>
@@ -223,9 +251,37 @@
     <script>
         const WORK_DURATION = 60;   
         const REST_DURATION = 120;  
-        const MUSIC_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
+        const MUSIC_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3";
 
-        let timer = null;
+        // БАЗА ПЕРЕВОДОВ (ТЕПЕРЬ ВСЁ НА МЕСТЕ!)
+        const i18n = {
+            ru: {
+                mainTitle: "Время работать ✨",
+                statusText: "До разминки осталось:",
+                soundLabel: "🔔 Сигнал разминки:",
+                optDig: "Цифровой сигнал", optGong: "Космический гонг", optBowl: "Тибетская чаша",
+                restTitle: "Время разминки! 🧘‍♂️",
+                restSpeech: "«Ген, заbasic-уйся... Вдохни поглубже и расправь плечи!»",
+                btnMusicOn: "🎵 Включить музыку релакс", btnMusicOff: "⏸ Поставить на паузу",
+                btnReturn: "Вернуться в суету",
+                notifTitle: "Чебурашка зовёт!", notifBody: "Фёдор, пора размяться!",
+                exercises: ["👀 <strong>Глаза:</strong> Закрой глаза на 10 секунд, посмотри в окно вдаль.", "🧘‍♂️ <strong>Спина:</strong> Встань ровно, потянись лапами вверх.", "💧 <strong>Вода:</strong> Сделай пару глотков чистой воды."]
+            },
+            de: {
+                mainTitle: "Zeit zu arbeiten ✨",
+                statusText: "Bis zur Pause:",
+                soundLabel: "🔔 Pausensignal:",
+                optDig: "Digitaler Alarm", optGong: "Weltraum-Gong", optBowl: "Tibetische Schale",
+                restTitle: "Zeit für die Pause! 🧘‍♂️",
+                restSpeech: "«Gena, entbasic-e dich... Atme tief ein und strecke dich!»",
+                btnMusicOn: "🎵 Relax-Musik einschalten", btnMusicOff: "⏸ Pause",
+                btnReturn: "Zurück zur Arbeit",
+                notifTitle: "Tscheburaschka ruft!", notifBody: "Fedor, Zeit für eine Pause!",
+                exercises: ["👀 <strong>Augen:</strong> Augen für 10 Sekunden schließen, in die Ferne schauen.", "🧘‍♂️ <strong>Rücken:</strong> Aufrecht hinstrecken, die Arme nach oben ziehen.", "💧 <strong>Wasser:</strong> Ein paar Schlucke klares Wasser trinken."]
+            }
+        };
+
+        let currentLang = localStorage.getItem('chebu_lang') || 'ru';
         let notificationSent = false;
         
         const wEl = document.getElementById('w-timer');
@@ -242,6 +298,37 @@
 
         if (Notification.permission !== "granted" && Notification.permission !== "denied") {
             Notification.requestPermission();
+        }
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('chebu_lang', lang);
+            document.documentElement.lang = lang;
+
+            document.getElementById('lang-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('lang-de').classList.toggle('active', lang === 'de');
+
+            document.getElementById('main-title').innerHTML = i18n[lang].mainTitle;
+            document.getElementById('status-text').innerHTML = i18n[lang].statusText;
+            document.getElementById('sound-label').innerHTML = i18n[lang].soundLabel;
+            document.getElementById('opt-dig').innerHTML = i18n[lang].optDig;
+            document.getElementById('opt-gong').innerHTML = i18n[lang].optGong;
+            document.getElementById('opt-bowl').innerHTML = i18n[lang].optBowl;
+            document.getElementById('rest-title').innerHTML = i18n[lang].restTitle;
+            document.getElementById('rest-speech').innerHTML = i18n[lang].restSpeech;
+            document.getElementById('s-btn').innerHTML = i18n[lang].btnReturn;
+            
+            musicBtn.innerHTML = musicAudio.paused ? i18n[lang].btnMusicOn : i18n[lang].btnMusicOff;
+
+            const exList = document.getElementById('exercises-list');
+            exList.innerHTML = "";
+            i18n[lang].exercises.forEach(ex => {
+                const li = document.createElement('li');
+                li.innerHTML = ex;
+                exList.appendChild(li);
+            });
+
+            updateStreakDisplay();
         }
 
         function format(seconds) {
@@ -268,6 +355,7 @@
             }
         }
 
+        // ЖИВУЧАЯ ЛОГИКА ТАЙМЕРА (ДЛЯ ПК И ТЕЛЕФОНА)
         function updateTimer() {
             const now = Math.floor(Date.now() / 1000);
             let endTime = parseInt(localStorage.getItem('chebu_endTime'));
@@ -286,17 +374,19 @@
                 if (mode === 'work') {
                     localStorage.setItem('chebu_mode', 'rest');
                     localStorage.setItem('chebu_endTime', now + REST_DURATION);
+                    
+                    // ВКЛЮЧАЕМ ВСПЛЫВАЮЩИЙ ОВЕРЛЕЙ ЧЕБУРАШКИ!
                     ovEl.classList.add('active');
                     wEl.innerText = format(0);
                     rEl.innerText = format(REST_DURATION);
                     
-                    videoPlayer.play().catch(e => console.log("Ждем клика"));
+                    videoPlayer.play().catch(e => console.log("Ждем активность"));
                     
                     alarmAudio.src = soundSelect.value;
                     alarmAudio.load(); 
-                    alarmAudio.play().catch(e => console.log("Браузер заблокировал автозвук"));
+                    alarmAudio.play().catch(e => console.log("Браузер блокирует автозвук"));
                     
-                    sendNotification("Чебурашка зовёт!", "Фёдор, пора размяться!");
+                    sendNotification(i18n[currentLang].notifTitle, i18n[currentLang].notifBody);
                 } else {
                     incrementStreak();
                     startWorkMode();
@@ -325,33 +415,39 @@
             alarmAudio.currentTime = 0;
             videoPlayer.pause();
             videoPlayer.currentTime = 0;
-            musicBtn.innerText = "🎵 Включить музыку релакс";
             
             wEl.innerText = format(WORK_DURATION);
             notificationSent = false;
+            applyLanguage(currentLang);
         }
+
+        document.getElementById('lang-ru').addEventListener('click', () => applyLanguage('ru'));
+        document.getElementById('lang-de').addEventListener('click', () => applyLanguage('de'));
 
         soundSelect.addEventListener('change', () => {
             alarmAudio.src = soundSelect.value;
             alarmAudio.load();
-            alarmAudio.play().catch(e => console.log("Кликните по экрану для теста"));
+            alarmAudio.play().catch(e => console.log("Нужен клик"));
             setTimeout(() => { alarmAudio.pause(); alarmAudio.currentTime = 0; }, 2000);
         });
 
-        clearInterval(timer);
-        timer = setInterval(updateTimer, 1000);
-        
-        updateStreakDisplay();
-        updateTimer();
+        // ЗАПУСК ЧЕРЕЗ АНИМАЦИОННЫЙ ЦИКЛ, ЧТОБЫ ТЕЛЕФОН НЕ СПАЛ
+        function tick() {
+            updateTimer();
+            setTimeout(tick, 1000);
+        }
+        tick();
+
+        applyLanguage(currentLang);
 
         musicBtn.addEventListener('click', () => {
             if (musicAudio.paused) {
                 musicAudio.play()
-                    .then(() => { musicBtn.innerText = "⏸ Поставить на паузу"; })
+                    .then(() => { musicBtn.innerHTML = i18n[currentLang].btnMusicOff; })
                     .catch(e => console.log("Звук заблокирован"));
             } else {
                 musicAudio.pause();
-                musicBtn.innerText = "🎵 Включить музыку релакс";
+                musicBtn.innerHTML = i18n[currentLang].btnMusicOn;
             }
         });
 
