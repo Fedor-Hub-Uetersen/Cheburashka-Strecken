@@ -9,10 +9,12 @@
             --bg: #0a0a0c; 
             --card: #121216; 
             --text: #ffffff; 
-            --accent: #ff5500; 
-            --music: #00ff66;  
+            --accent: #ff5500; /* Яркий неоновый оранжевый */
+            --music: #00ff66;  /* Кислотно-зеленый неон */
             --neon-glow: 0 0 15px var(--accent), 0 0 30px var(--accent);
             --neon-music: 0 0 15px var(--music);
+            /* Мягкое неоновое свечение для мелкого текста в подвале */
+            --neon-footer: 0 0 6px var(--accent);
         }
         
         body { 
@@ -28,6 +30,7 @@
             overflow: hidden; 
         }
 
+        /* Неоновый контейнер */
         .container { 
             position: relative;
             text-align: center; 
@@ -39,6 +42,7 @@
             width: 380px; 
         }
 
+        /* Счётчик разминок в углу */
         .streak-counter {
             position: absolute;
             top: 15px;
@@ -51,6 +55,7 @@
             text-transform: uppercase;
         }
 
+        /* Блок логотипа */
         .logo-area {
             margin-bottom: 20px;
             display: flex;
@@ -82,6 +87,7 @@
         .timer { font-size: 68px; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; text-shadow: 0 0 10px #fff; }
         .status { font-size: 14px; color: #8a8a93; letter-spacing: 1px; text-transform: uppercase; }
         
+        /* Блок выбора звука гонга */
         .sound-selector {
             margin: 15px 0 5px 0;
             display: flex;
@@ -134,14 +140,25 @@
         .btn-m { border-color: var(--music); color: #fff; box-shadow: inset 0 0 8px rgba(0, 255, 102, 0.2); min-width: 220px; }
         .btn-m:hover { background: var(--music); box-shadow: var(--neon-music); color: #000; }
 
+        /* Фирменный подвал с полной неоновой подсветкой */
         .footer-credits {
             margin-top: 25px;
             font-size: 11px;
-            color: #555;
+            color: #bbb; /* Сделал базовый текст чуть светлее для контраста */
             letter-spacing: 1px;
             text-transform: uppercase;
         }
-        .footer-credits a { color: var(--accent); text-decoration: none; font-weight: bold; }
+        .footer-credits a { 
+            color: var(--accent); 
+            text-decoration: none; 
+            font-weight: bold; 
+            text-shadow: var(--neon-footer); /* Подсветка ссылки */
+        }
+        .neon-phone {
+            color: var(--accent);
+            font-weight: bold;
+            text-shadow: var(--neon-footer); /* Подсветка телефона */
+        }
     </style>
 </head>
 <body>
@@ -158,7 +175,6 @@
         <div class="status" id="status-text">До разминки осталось:</div>
         <div class="timer" id="w-timer" style="color: #fff; text-shadow: var(--neon-glow);">01:00</div>
         
-        <!-- НАСТРОЙКА: Имена файлов, которые лежат в твоей папке ПК -->
         <div class="sound-selector">
             <label for="alarm-sound-select">🔔 Сигнал разминки:</label>
             <select id="alarm-sound-select">
@@ -169,7 +185,7 @@
         </div>
 
         <div class="footer-credits">
-            © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | +49017661566356
+            © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | <span class="neon-phone">+49017661566356</span>
         </div>
     </div>
 
@@ -186,7 +202,7 @@
             
             <ul class="exercises">
                 <li>👀 <strong>Глаза:</strong> Закрой глаза на 10 секунд, посмотри в окно вдаль.</li>
-                <li>🧘‍♂️ <strong>Спина:</strong> Встань ровно, потянись руками вверх и вытяни хвост.</li>
+                <li>🧘‍♂️ <strong>Спина:</strong> Встань ровно, потянись лапами вверх.</li>
                 <li>💧 <strong>Вода:</strong> Сделай пару глотков чистой воды.</li>
             </ul>
 
@@ -195,8 +211,8 @@
                 <button class="btn" id="s-btn">Вернуться в суету</button>
             </div>
 
-            <div class="footer-credits" style="color: #444;">
-                © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | +49017661566356
+            <div class="footer-credits" style="color: #888;">
+                © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | <span class="neon-phone">+49017661566356</span>
             </div>
         </div>
     </div>
@@ -276,10 +292,9 @@
                     
                     videoPlayer.play().catch(e => console.log("Ждем клика"));
                     
-                    // Запуск твоего локального файла звука
                     alarmAudio.src = soundSelect.value;
                     alarmAudio.load(); 
-                    alarmAudio.play().catch(e => console.log("Браузер заблокировал звук"));
+                    alarmAudio.play().catch(e => console.log("Браузер заблокировал автозвук"));
                     
                     sendNotification("Чебурашка зовёт!", "Друг, пора размяться!");
                 } else {
@@ -348,4 +363,5 @@
         });
     </script>
 </body>
+</html>
 </html>
