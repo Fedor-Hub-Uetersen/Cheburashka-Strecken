@@ -1,485 +1,74 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChebuYoga — Tech.chebur.shop</title>
-    <style>
-        :root { 
-            --bg: #0a0a0c; 
-            --card: #121216; 
-            --text: #ffffff; 
-            --accent: #ff5500; /* Яркий неоновый оранжевый */
-            --music: #00ff66;  /* Кислотно-зеленый неон */
-            --neon-glow: 0 0 15px var(--accent), 0 0 30px var(--accent);
-            --neon-music: 0 0 15px var(--music);
-            --neon-footer: 0 0 6px var(--accent);
-        }
-        
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            display: flex; 
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            overflow: hidden; 
-        }
-
-        /* Неоновый контейнер */
-        .container { 
-            position: relative;
-            text-align: center; 
-            background: var(--card); 
-            padding: 40px; 
-            border-radius: 20px; 
-            border: 2px solid var(--accent);
-            box-shadow: 0 0 25px rgba(255, 85, 0, 0.2), inset 0 0 15px rgba(255, 85, 0, 0.1); 
-            width: 380px; 
-        }
-
-        /* Переключатель языков в левом углу */
-        .lang-switcher {
-            position: absolute;
-            top: 15px;
-            left: 20px;
-            display: flex;
-            gap: 8px;
-        }
-        .lang-btn {
-            background: #1a1a24;
-            border: 1px solid #444;
-            color: #8a8a93;
-            padding: 3px 8px;
-            font-size: 11px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        .lang-btn.active {
-            border-color: var(--music);
-            color: #fff;
-            box-shadow: 0 0 5px var(--music);
-        }
-
-        /* Счётчик разминок в правом углу */
-        .streak-counter {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            color: var(--music);
-            text-shadow: 0 0 5px var(--music);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* Блок логотипа */
-        .logo-area {
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .wolf-logo-placeholder {
-            font-size: 18px; 
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #fff;
-            text-shadow: var(--neon-glow);
-            border: 1px dashed rgba(255, 85, 0, 0.4);
-            padding: 10px 20px;
-            border-radius: 10px;
-            text-transform: uppercase;
-        }
-
-        .wolf-logo-img {
-            max-width: 120px;
-            height: auto;
-            filter: drop-shadow(0 0 10px var(--accent));
-            display: none; 
-        }
-
-        h1 { font-size: 24px; color: #fff; text-shadow: var(--neon-glow); margin: 15px 0 5px 0; text-transform: uppercase; }
-        .timer { font-size: 68px; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; text-shadow: 0 0 10px #fff; }
-        .status { font-size: 14px; color: #8a8a93; letter-spacing: 1px; text-transform: uppercase; }
-        
-        /* Блок выбора звука гонга */
-        .sound-selector {
-            margin: 15px 0 5px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-        .sound-selector label {
-            font-size: 11px;
-            color: #8a8a93;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .sound-selector select {
-            background: #1a1a24;
-            color: #fff;
-            border: 1px solid var(--accent);
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.3s;
-        }
-        .sound-selector select:focus {
-            box-shadow: 0 0 8px var(--accent);
-        }
-
-        .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(6, 6, 8, 0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.5s; }
-        .overlay.active { opacity: 1; pointer-events: auto; }
-        .content { text-align: center; max-width: 600px; padding: 20px; display: flex; flex-direction: column; align-items: center; z-index: 10; }
-        
-        .my-video {
-            width: 340px;
-            height: 190px;
-            border-radius: 15px;
-            border: 2px solid var(--accent);
-            box-shadow: var(--neon-glow);
-            margin-bottom: 20px;
-            background: #000;
-        }
-        
-        .speech { font-style: italic; color: #ffaa66; font-size: 18px; margin-bottom: 15px; text-shadow: 0 0 5px rgba(255,170,102,0.3); }
-        .exercises { text-align: left; font-size: 18px; line-height: 1.6; margin-bottom: 20px; width: 100%; color: #e1e1e6; }
-        .btn-group { display: flex; gap: 15px; justify-content: center; margin-bottom: 15px; }
-        
-        .btn { background: transparent; color: #fff; border: 2px solid var(--accent); padding: 12px 25px; font-size: 15px; border-radius: 25px; cursor: pointer; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; transition: all 0.2s; box-shadow: inset 0 0 8px rgba(255, 85, 0, 0.2); }
-        .btn:hover { background: var(--accent); box-shadow: var(--neon-glow); color: #000; transform: scale(1.05); }
-        
-        .btn-m { border-color: var(--music); color: #fff; box-shadow: inset 0 0 8px rgba(0, 255, 102, 0.2); min-width: 220px; }
-        .btn-m:hover { background: var(--music); box-shadow: var(--neon-music); color: #000; }
-
-        .footer-credits {
-            margin-top: 25px;
-            font-size: 11px;
-            color: #bbb;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .footer-credits a { 
-            color: var(--accent); 
-            text-decoration: none; 
-            font-weight: bold; 
-            text-shadow: var(--neon-footer);
-        }
-        .neon-phone {
-            color: var(--accent);
-            font-weight: bold;
-            text-shadow: var(--neon-footer);
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <!-- ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКОВ -->
-        <div class="lang-switcher">
-            <button class="lang-btn active" id="lang-ru">RU</button>
-            <button class="lang-btn" id="lang-de">DE</button>
-        </div>
-
-        <!-- СЧЁТЧИК РАЗМИНОК -->
-        <div class="streak-counter" id="streak-display">Bio-Score: 0</div>
-
-        <div class="logo-area">
-            <div class="wolf-logo-placeholder" id="wolf-text">TECH.CHEBUR.SHOP</div>
-            <img src="wolf.png" alt="BioWolf Logo" class="wolf-logo-img" id="wolf-img">
-        </div>
-
-        <h1 id="main-title">Время работать ✨</h1>
-        <div class="status" id="status-text">До разминки осталось:</div>
-        <div class="timer" id="w-timer" style="color: #fff; text-shadow: var(--neon-glow);">01:00</div>
-        
-        <div class="sound-selector">
-            <label for="alarm-sound-select" id="sound-label">🔔 Сигнал разминки:</label>
-            <select id="alarm-sound-select">
-                <option value="digital.mp3" id="opt-dig">Цифровой сигнал</option>
-                <option value="gong.mp3" id="opt-gong" selected>Космический гонг</option>
-                <option value="bowl.mp3" id="opt-bowl">Тибетская чаша</option>
-            </select>
-        </div>
-
-        <div class="footer-credits">
-            © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | 
-            <span class="neon-phone"><a href="tel:+49017661566356" style="color: inherit; text-decoration: none;">+49017661566356</a></span>
-        </div>
-    </div>
-
-    <div class="overlay" id="overlay">
-        <div class="content">
-            <video class="my-video" id="yoga-video" controls preload="auto" loop muted>
-                <source src="video.mp4" type="video/mp4">
-                Ваш браузер не поддерживает video.
-            </video>
-            
-            <h2 id="rest-title" style="text-shadow: var(--neon-glow);">Время разминки! 🧘‍♂️</h2>
-            <div class="speech" id="rest-speech">«Ген, заbasic-уйся... Вдохни поглубже и расправь плечи!»</div>
-            <div class="timer" id="r-timer" style="color: var(--music); text-shadow: var(--neon-music);">02:00</div>
-            
-            <ul class="exercises" id="exercises-list">
-                <!-- Заполняется через JavaScript -->
-            </ul>
-
-            <div class="btn-group">
-                <button class="btn btn-m" id="m-btn">🎵 Включить музыку релакс</button>
-                <button class="btn" id="s-btn">Вернуться в суету</button>
-            </div>
-
-            <div class="footer-credits" style="color: #444;">
-                © Tm.<a href="https://tech.chebur.shop" target="_blank">tech.chebur.shop</a> | 
-                <span class="neon-phone"><a href="tel:+49017661566356" style="color: inherit; text-decoration: none;">+49017661566356</a></span>
-            </div>
-        </div>
-    </div>
-
-    <audio id="bg-music" preload="auto" loop></audio>
-    <audio id="alarm-sound" preload="auto"></audio>
-
-    <script>
-        const WORK_DURATION = 60;   
-        const REST_DURATION = 120;  
-      const MUSIC_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3";
-
-        // БАЗА ПЕРЕВОДОВ
+<script>
+        const WORK_DURATION = 60, REST_DURATION = 120;
         const i18n = {
-            ru: {
-                mainTitle: "Время работать ✨",
-                statusText: "До разминки осталось: ",
-                soundLabel: "🔔 Сигнал разминки:",
-                optDig: "Цифровой сигнал",
-                optGong: "Космический гонг",
-                optBowl: "Тибетская чаша",
-                restTitle: "Время разминки! 🧘‍♂️",
-                restSpeech: "«Ген, заbasic-уйся... Вдохни поглубже,расправь плечи и вытяни хвост!»",
-                btnMusicOn: "🎵 Включить музыку релакс",
-                btnMusicOff: "⏸ Поставить на паузу",
-                btnReturn: "Вернуться в суету",
-                notifTitle: "Чебурашка зовёт!",
-                notifBody: "Друг, пора размяться!",
-                exercises: [
-                    "👀 <strong>Глаза:</strong> Закрой глаза на 10 секунд, посмотри в окно вдаль.",
-                    "🧘‍♂️ <strong>Спина:</strong> Встань ровно, потянись лапами вверх.",
-                    "💧 <strong>Вода:</strong> Сделай пару глотков чистой воды."
-                ]
+            ru: { 
+                main: "Время работать ✨", sound: "🔔 Сигнал:", dig: "Цифровой", gong: "Гонг", bowl: "Чаша", 
+                rest: "Время разминки! 🧘‍♂️", mOn: "🎵 Музыка", mOff: "⏸ Пауза", back: "Вернуться", 
+                ex: ["Взгляд вдаль", "Потянись вверх", "Глоток воды"] 
             },
-            de: {
-                mainTitle: "Zeit zu arbeiten ✨",
-                statusText: "Bis zur Pause: ",
-                soundLabel: "🔔 Pausensignal:",
-                optDig: "Digitaler Alarm",
-                optGong: "Weltraum-Gong",
-                optBowl: "Tibetische Schale",
-                restTitle: "Zeit für die Pause! 🧘‍♂️",
-                restSpeech: "«Gena, entbasic-e dich... Atme tief ein und strecke dich!»",
-                btnMusicOn: "🎵 Relax-Musik einschalten",
-                btnMusicOff: "⏸ Pause",
-                btnReturn: "Zurück zur Arbeit",
-                notifTitle: "Tscheburaschka ruft!",
-                notifBody: "Friend, Zeit für eine Pause!",
-                exercises: [
-                    "👀 <strong>Augen:</strong> Augen für 10 Sekunden schließen, in die Ferne schauen.",
-                    "🧘‍♂️ <strong>Rücken:</strong> Aufrecht hinstrecken, die Arme nach oben ziehen.",
-                    "💧 <strong>Wasser:</strong> Ein paar Schlucke klares Wasser trinken."
-                ]
+            de: { 
+                main: "Zeit zu arbeiten ✨", sound: "🔔 Pausensignal:", dig: "Digital", gong: "Gong", bowl: "Schale", 
+                rest: "Zeit für die Pause! 🧘‍♂️", mOn: "🎵 Musik", mOff: "⏸ Pause", back: "Zurück", 
+                ex: ["Blick in die Ferne", "Streck dich", "Wasser trinken"] 
             }
         };
 
         let currentLang = localStorage.getItem('chebu_lang') || 'ru';
-        let timer = null;
-        let notificationSent = false;
-        
-        const wEl = document.getElementById('w-timer');
-        const rEl = document.getElementById('r-timer');
-        const ovEl = document.getElementById('overlay');
         const musicAudio = document.getElementById('bg-music');
-        const alarmAudio = document.getElementById('alarm-sound');
-        const videoPlayer = document.getElementById('yoga-video');
-        const musicBtn = document.getElementById('m-btn');
-        const streakEl = document.getElementById('streak-display');
-        const soundSelect = document.getElementById('alarm-sound-select');
-        
-        musicAudio.src = MUSIC_URL;
+        musicAudio.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3";
 
-        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-            Notification.requestPermission();
-        }
-
-        // Функция применения языка
         function applyLanguage(lang) {
             currentLang = lang;
             localStorage.setItem('chebu_lang', lang);
-            document.documentElement.lang = lang;
-
-            // Меняем активную кнопку флага
-            document.getElementById('lang-ru').classList.toggle('active', lang === 'ru');
-            document.getElementById('lang-de').classList.toggle('active', lang === 'de');
-
-            // Переводим интерфейс
-            document.getElementById('main-title').innerHTML = i18n[lang].mainTitle;
-            document.getElementById('status-text').innerHTML = i18n[lang].statusText;
-            document.getElementById('sound-label').innerHTML = i18n[lang].soundLabel;
-            document.getElementById('opt-dig').innerHTML = i18n[lang].optDig;
-            document.getElementById('opt-gong').innerHTML = i18n[lang].optGong;
-            document.getElementById('opt-bowl').innerHTML = i18n[lang].optBowl;
-            document.getElementById('rest-title').innerHTML = i18n[lang].restTitle;
-            document.getElementById('rest-speech').innerHTML = i18n[lang].restSpeech;
-            document.getElementById('s-btn').innerHTML = i18n[lang].btnReturn;
             
-            if (musicAudio.paused) {
-                musicBtn.innerHTML = i18n[lang].btnMusicOn;
-            } else {
-                musicBtn.innerHTML = i18n[lang].btnMusicOff;
-            }
+            // Основной экран
+            document.getElementById('main-title').innerText = i18n[lang].main;
+            document.getElementById('sound-label').innerText = i18n[lang].sound;
+            document.getElementById('opt-dig').innerText = i18n[lang].dig;
+            document.getElementById('opt-gong').innerText = i18n[lang].gong;
+            document.getElementById('opt-bowl').innerText = i18n[lang].bowl;
 
-            // Переводим упражнения
-            const exList = document.getElementById('exercises-list');
-            exList.innerHTML = "";
-            i18n[lang].exercises.forEach(ex => {
-                const li = document.createElement('li');
-                li.innerHTML = ex;
-                exList.appendChild(li);
-            });
-
-            updateStreakDisplay();
-        }
-
-        function format(seconds) {
-            if (seconds < 0) seconds = 0;
-            return `${Math.floor(seconds/60).toString().padStart(2,'0')}:${(seconds%60).toString().padStart(2,'0')}`;
-        }
-
-        function updateStreakDisplay() {
-            let currentStreak = parseInt(localStorage.getItem('chebu_streak')) || 0;
-            streakEl.innerText = `Bio-Score: ${currentStreak}`;
-        }
-
-        function incrementStreak() {
-            let currentStreak = parseInt(localStorage.getItem('chebu_streak')) || 0;
-            currentStreak++;
-            localStorage.setItem('chebu_streak', currentStreak);
-            updateStreakDisplay();
-        }
-
-        function sendNotification(title, body) {
-            if (Notification.permission === "granted" && !notificationSent) {
-                new Notification(title, { body: body });
-                notificationSent = true;
-            }
+            // Оверлей
+            document.getElementById('rest-title').innerText = i18n[lang].rest;
+            document.getElementById('s-btn').innerText = i18n[lang].back;
+            document.getElementById('m-btn').innerText = musicAudio.paused ? i18n[lang].mOn : i18n[lang].mOff;
+            document.getElementById('exercises-list').innerHTML = i18n[lang].ex.map(e => `<li>${e}</li>`).join('');
+            
+            // Переключатели
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.id.includes(lang)));
         }
 
         function updateTimer() {
             const now = Math.floor(Date.now() / 1000);
             let endTime = parseInt(localStorage.getItem('chebu_endTime'));
-            let mode = localStorage.getItem('chebu_mode');
-
-            if (!endTime || !mode) {
-                localStorage.setItem('chebu_mode', 'work');
-                localStorage.setItem('chebu_endTime', now + WORK_DURATION);
-                mode = 'work';
-                endTime = now + WORK_DURATION;
-            }
-
+            if (!endTime || endTime < now - 300) { startWorkMode(); return; }
             let timeLeft = endTime - now;
-
             if (timeLeft <= 0) {
-                if (mode === 'work') {
+                if (localStorage.getItem('chebu_mode') === 'work') {
                     localStorage.setItem('chebu_mode', 'rest');
                     localStorage.setItem('chebu_endTime', now + REST_DURATION);
-                    ovEl.classList.add('active');
-                    wEl.innerText = format(0);
-                    rEl.innerText = format(REST_DURATION);
-                    
-                    videoPlayer.play().catch(e => console.log("Ждем клика"));
-                    
-                    alarmAudio.src = soundSelect.value;
-                    alarmAudio.load(); 
-                    alarmAudio.play().catch(e => console.log("Блокировка звука"));
-                    
-                    sendNotification(i18n[currentLang].notifTitle, i18n[currentLang].notifBody);
+                    document.getElementById('overlay').classList.add('active');
+                    document.getElementById('alarm-sound').src = document.getElementById('alarm-sound-select').value;
+                    document.getElementById('alarm-sound').play().catch(()=>{});
                 } else {
-                    incrementStreak();
+                    let s = parseInt(localStorage.getItem('chebu_streak') || 0) + 1;
+                    localStorage.setItem('chebu_streak', s);
+                    document.getElementById('streak-display').innerText = `Bio-Score: ${s}`;
                     startWorkMode();
                 }
             } else {
-                if (mode === 'work') {
-                    ovEl.classList.remove('active');
-                    wEl.innerText = format(timeLeft);
-                    notificationSent = false;
-                } else {
-                    ovEl.classList.add('active');
-                    rEl.innerText = format(timeLeft);
-                }
+                let el = localStorage.getItem('chebu_mode') === 'work' ? document.getElementById('w-timer') : document.getElementById('r-timer');
+                el.innerText = `${Math.floor(timeLeft/60).toString().padStart(2,'0')}:${(timeLeft%60).toString().padStart(2,'0')}`;
             }
         }
 
         function startWorkMode() {
-            const now = Math.floor(Date.now() / 1000);
             localStorage.setItem('chebu_mode', 'work');
-            localStorage.setItem('chebu_endTime', now + WORK_DURATION);
-            ovEl.classList.remove('active');
-            
+            localStorage.setItem('chebu_endTime', Math.floor(Date.now() / 1000) + WORK_DURATION);
+            document.getElementById('overlay').classList.remove('active');
             musicAudio.pause();
-            musicAudio.currentTime = 0;
-            alarmAudio.pause();
-            alarmAudio.currentTime = 0;
-            videoPlayer.pause();
-            videoPlayer.currentTime = 0;
-            musicBtn.innerHTML = i18n[currentLang].btnMusicOn;
-            
-            wEl.innerText = format(WORK_DURATION);
-            notificationSent = false;
         }
 
-        // Слушатели для флагов
-        document.getElementById('lang-ru').addEventListener('click', () => applyLanguage('ru'));
-        document.getElementById('lang-de').addEventListener('click', () => applyLanguage('de'));
-
-        soundSelect.addEventListener('change', () => {
-            alarmAudio.src = soundSelect.value;
-            alarmAudio.load();
-            alarmAudio.play().catch(e => console.log("Ждем клика"));
-            setTimeout(() => { alarmAudio.pause(); alarmAudio.currentTime = 0; }, 2000);
-        });
-
-        clearInterval(timer);
-        timer = setInterval(updateTimer, 1000);
-        
-        // Запуск мультиязычной системы
+        setInterval(updateTimer, 1000);
         applyLanguage(currentLang);
-        updateTimer();
-
-        musicBtn.addEventListener('click', () => {
-            if (musicAudio.paused) {
-                musicAudio.play()
-                    .then(() => { musicBtn.innerHTML = i18n[currentLang].btnMusicOff; })
-                    .catch(e => console.log("Звук заблокирован"));
-            } else {
-                musicAudio.pause();
-                musicBtn.innerHTML = i18n[currentLang].btnMusicOn;
-            }
-        });
-
-        document.getElementById('s-btn').addEventListener('click', () => {
-            if (localStorage.getItem('chebu_mode') === 'rest') {
-                incrementStreak();
-            }
-            startWorkMode();
-        });
     </script>
-</body>
-</html>
